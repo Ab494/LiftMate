@@ -1,4 +1,4 @@
-const Footer = () => {
+const Footer = ({ currentRide, todaysEarnings }) => {
   return (
     <footer
       style={{
@@ -53,11 +53,17 @@ const Footer = () => {
         </div>
 
         {/* DRIVER STATUS */}
-        <div>
-          <h3 style={{ color: "white", marginBottom: "15px" }}>Driver Status</h3>
-          <p style={{ marginBottom: "10px", color: "#ccc" }}>Active Ride: In Progress</p>
-          <p style={{ color: "#ccc" }}>Earnings Today: KES 0</p>
-        </div>
+        {currentRide !== undefined && (
+          <div>
+            <h3 style={{ color: "white", marginBottom: "15px" }}>Driver Status</h3>
+            <p style={{ marginBottom: "10px", color: "#ccc" }}>
+              Active Ride: {currentRide ? 'In Progress' : 'None'}
+            </p>
+            <p style={{ color: "#ccc" }}>
+              Earnings Today: KES {todaysEarnings || 0}
+            </p>
+          </div>
+        )}
 
         {/* TRAVEL */}
         <div>

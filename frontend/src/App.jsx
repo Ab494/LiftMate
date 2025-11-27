@@ -1,6 +1,6 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -35,76 +35,94 @@ const PrivateRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
+const AppContent = () => {
+  const location = useLocation();
+  const { user } = useContext(AuthContext);
+  const [driverStatus, setDriverStatus] = useState({ currentRide: null, todaysEarnings: 0 });
+
+  // Update driver status when on driver dashboard
+  useEffect(() => {
+    if (location.pathname === '/driver-dashboard' && user?.role === 'driver') {
+      // This would ideally come from a context or API call
+      // For now, we'll set defaults
+      setDriverStatus({ currentRide: null, todaysEarnings: 0 });
+    }
+  }, [location.pathname, user]);
+
+  const isDriverDashboard = location.pathname === '/driver-dashboard' && user?.role === 'driver';
+
+  return (
+    <>
+      <Navbar />
+      <Box>
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/airports" element={<AirportSelection />} />
+          <Route path="/cities" element={<CitySelection />} />
+          <Route
+            path="/ride-request"
+            element={
+              <PrivateRoute>
+                <RideRequest />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ride-history"
+            element={
+              <PrivateRoute>
+                <RideHistory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/driver-dashboard"
+            element={
+              <PrivateRoute>
+                <DriverDashboard onStatusUpdate={setDriverStatus} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ride-requests-list"
+            element={
+              <PrivateRoute>
+                <RideRequestsList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/current-ride"
+            element={
+              <PrivateRoute>
+                <CurrentRidePage />
+              </PrivateRoute>
+            }
+          />
+          {/* Catch-all redirects to Home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Box>
+      <Footer
+        currentRide={isDriverDashboard ? driverStatus.currentRide : undefined}
+        todaysEarnings={isDriverDashboard ? driverStatus.todaysEarnings : undefined}
+      />
+    </>
+  );
+};
+
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <Router>
-          <Navbar />
-          <Box>
-            {/* Routes */}
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/airports" element={<AirportSelection />} />
-              <Route path="/cities" element={<CitySelection />} />
-              <Route
-                path="/ride-request"
-                element={
-                  <PrivateRoute>
-                    <RideRequest />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/ride-history"
-                element={
-                  <PrivateRoute>
-                    <RideHistory />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/driver-dashboard"
-                element={
-                  <PrivateRoute>
-                    <DriverDashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/ride-requests-list"
-                element={
-                  <PrivateRoute>
-                    <RideRequestsList />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/current-ride"
-                element={
-                  <PrivateRoute>
-                    <CurrentRidePage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/driver-dashboard"
-                element={
-                  <PrivateRoute>
-                    <DriverDashboard />
-                  </PrivateRoute>
-                }
-              />
-              {/* Catch-all redirects to Home */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </Box>
-          <Footer />
+          <AppContent />
         </Router>
       </AuthProvider>
     </ThemeProvider>

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getAvailableRides, acceptRide, completeRide, markDriverArrived, getDriverStats } from '../api/rides';
 import MapView from '../components/MapView';
-import { Container, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Box, Grid, Card, CardContent, Paper, IconButton, Tabs, Tab } from '@mui/material';
+import { Container, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Box, Grid, Card, CardContent, Paper, IconButton, Tabs, Tab, keyframes } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -10,7 +10,30 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 
-const DriverDashboard = () => {
+// Define animations
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const DriverDashboard = ({ onStatusUpdate }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [availableRides, setAvailableRides] = useState([]);
@@ -47,6 +70,16 @@ const DriverDashboard = () => {
     };
     fetchStats();
   }, [user.token]);
+
+  // Update footer status when currentRide or stats change
+  useEffect(() => {
+    if (onStatusUpdate) {
+      onStatusUpdate({
+        currentRide: !!currentRide,
+        todaysEarnings: stats.ordersReceived.today || 0
+      });
+    }
+  }, [currentRide, stats.ordersReceived.today, onStatusUpdate]);
 
   const handleAcceptRide = async (ride) => {
     try {
@@ -102,48 +135,163 @@ const DriverDashboard = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 3, mb: 3, px: 0 }}>
-      <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', color: '#062B32', mb: 4 }}>
-        Driver Dashboard
+    <Container maxWidth="xl" sx={{ mt: 3, mb: 3, px: 0, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh', borderRadius: 3, p: 3, boxShadow: 3 }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          textAlign: 'center',
+          color: 'white',
+          mb: 4,
+          textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+          fontWeight: 'bold',
+          animation: `${fadeIn} 1s ease-in`
+        }}
+      >
+        🚗 Driver Dashboard
       </Typography>
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={2}>
-          <Card sx={{ backgroundColor: '#e8f5e8', borderLeft: '4px solid #4caf50', cursor: 'pointer' }} onClick={() => navigate('/ride-requests-list')}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <img src="/images/car.png" alt="car" style={{ width: 40, height: 40 }} />
-              <Typography variant="h5">{availableRides.length}</Typography>
-              <Typography>Available Rides</Typography>
+          <Card
+            sx={{
+              background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+              borderLeft: '4px solid #4caf50',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              animation: `${slideIn} 0.6s ease-out`,
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 8px 25px rgba(76, 175, 80, 0.3)',
+                borderLeft: '4px solid #2e7d32'
+              }
+            }}
+            onClick={() => navigate('/ride-requests-list')}
+          >
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Box sx={{
+                backgroundColor: '#4caf50',
+                borderRadius: '50%',
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}>
+                <img src="/images/car.png" alt="car" style={{ width: 35, height: 35, filter: 'brightness(0) invert(1)' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>{availableRides.length}</Typography>
+              <Typography sx={{ color: '#388e3c', fontWeight: 'medium' }}>Available Rides</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={2}>
-          <Card sx={{ backgroundColor: '#fff3e0', borderLeft: '4px solid #ff9800', cursor: currentRide ? 'pointer' : 'default' }} onClick={() => currentRide && navigate('/current-ride')}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <LocationOnIcon sx={{ fontSize: 40, color: '#ff9800' }} />
-              <Typography variant="h5">{currentRide ? 1 : 0}</Typography>
-              <Typography>Current Ride</Typography>
+          <Card
+            sx={{
+              background: 'linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%)',
+              borderLeft: '4px solid #ff9800',
+              cursor: currentRide ? 'pointer' : 'default',
+              transition: 'all 0.3s ease',
+              animation: `${slideIn} 0.6s ease-out 0.1s both`,
+              '&:hover': currentRide ? {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 8px 25px rgba(255, 152, 0, 0.3)',
+                borderLeft: '4px solid #f57c00'
+              } : {}
+            }}
+            onClick={() => currentRide && navigate('/current-ride')}
+          >
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Box sx={{
+                backgroundColor: '#ff9800',
+                borderRadius: '50%',
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}>
+                <LocationOnIcon sx={{ fontSize: 30, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#f57c00' }}>{currentRide ? 1 : 0}</Typography>
+              <Typography sx={{ color: '#e65100', fontWeight: 'medium' }}>Current Ride</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={2}>
-          <Card sx={{ backgroundColor: '#fce4ec', borderLeft: '4px solid #e91e63' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <ReceiptIcon sx={{ fontSize: 40, color: '#e91e63' }} />
-              <Typography variant="h5">{stats.ordersReceived.total}</Typography>
-              <Typography>Orders Received</Typography>
+          <Card
+            sx={{
+              background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
+              borderLeft: '4px solid #e91e63',
+              transition: 'all 0.3s ease',
+              animation: `${slideIn} 0.6s ease-out 0.2s both`,
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 8px 25px rgba(233, 30, 99, 0.3)',
+                borderLeft: '4px solid #c2185b'
+              }
+            }}
+          >
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Box sx={{
+                backgroundColor: '#e91e63',
+                borderRadius: '50%',
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}>
+                <ReceiptIcon sx={{ fontSize: 30, color: 'white' }} />
+              </Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#c2185b' }}>{stats.ordersReceived.total}</Typography>
+              <Typography sx={{ color: '#ad1457', fontWeight: 'medium' }}>Orders Received</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={2}>
-          <Card sx={{
-            backgroundColor: currentRide ? '#fff9c4' : '#f5f5f5',
-            border: `2px solid ${currentRide ? '#ffeb3b' : '#bdbdbd'}`
-          }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <img src="/images/car.png" alt="car" style={{ width: 40, height: 40, filter: currentRide ? 'none' : 'grayscale(100%)' }} />
-              <Typography variant="h5" sx={{ color: currentRide ? '#f57c00' : '#757575' }}>
+          <Card
+            sx={{
+              background: currentRide ? 'linear-gradient(135deg, #fff9c4 0%, #fff176 100%)' : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+              border: `2px solid ${currentRide ? '#ffeb3b' : '#bdbdbd'}`,
+              transition: 'all 0.3s ease',
+              animation: `${slideIn} 0.6s ease-out 0.3s both`,
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 8px 25px rgba(255, 235, 59, 0.3)'
+              }
+            }}
+          >
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Box sx={{
+                backgroundColor: currentRide ? '#ffeb3b' : '#bdbdbd',
+                borderRadius: '50%',
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.1)' }
+              }}>
+                <img src="/images/car.png" alt="car" style={{ width: 30, height: 30, filter: currentRide ? 'none' : 'grayscale(100%)' }} />
+              </Box>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', color: currentRide ? '#f57c00' : '#757575' }}>
                 {currentRide ? 'Active' : 'No Active'}
               </Typography>
               <Typography sx={{ fontSize: '0.75rem', color: currentRide ? '#f57c00' : '#757575' }}>
@@ -153,18 +301,49 @@ const DriverDashboard = () => {
           </Card>
         </Grid>
         <Grid item xs={12} md={2}>
-          <Card sx={{ backgroundColor: '#e3f2fd', borderLeft: '4px solid #2196f3' }}>
-            <CardContent sx={{ textAlign: 'center', position: 'relative' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <AttachMoneyIcon sx={{ fontSize: 40, color: '#2196f3' }} />
-                <IconButton onClick={() => setBalanceVisible(!balanceVisible)} sx={{ ml: 1 }}>
-                  {balanceVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+          <Card
+            sx={{
+              background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+              borderLeft: '4px solid #2196f3',
+              transition: 'all 0.3s ease',
+              animation: `${slideIn} 0.6s ease-out 0.4s both`,
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 8px 25px rgba(33, 150, 243, 0.3)',
+                borderLeft: '4px solid #1976d2'
+              }
+            }}
+          >
+            <CardContent sx={{ textAlign: 'center', py: 3, position: 'relative' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <Box sx={{
+                  backgroundColor: '#2196f3',
+                  borderRadius: '50%',
+                  width: 60,
+                  height: 60,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 1,
+                  transition: 'transform 0.3s ease',
+                  '&:hover': { transform: 'scale(1.1)' }
+                }}>
+                  <AttachMoneyIcon sx={{ fontSize: 30, color: 'white' }} />
+                </Box>
+                <IconButton
+                  onClick={() => setBalanceVisible(!balanceVisible)}
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' }
+                  }}
+                >
+                  {balanceVisible ? <VisibilityIcon sx={{ color: 'white' }} /> : <VisibilityOffIcon sx={{ color: 'white' }} />}
                 </IconButton>
               </Box>
-              <Typography variant="h5">
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
                 {balanceVisible ? `KES ${stats.earnings}` : '****'}
               </Typography>
-              <Typography>Total Earnings</Typography>
+              <Typography sx={{ color: '#1565c0', fontWeight: 'medium' }}>Total Earnings</Typography>
             </CardContent>
           </Card>
         </Grid>
