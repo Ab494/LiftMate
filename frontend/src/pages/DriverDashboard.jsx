@@ -186,7 +186,7 @@ const DriverDashboard = ({ onStatusUpdate }) => {
                 <img src="/images/car.png" alt="car" style={{ width: 35, height: 35, filter: 'brightness(0) invert(1)' }} />
               </Box>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>{availableRides.length}</Typography>
-              <Typography sx={{ color: '#388e3c', fontWeight: 'medium' }}>Available Rides</Typography>
+              <Typography sx={{ color: '#388e3c', fontWeight: 'medium' }}>Available Requests</Typography>
             </CardContent>
           </Card>
         </Grid>
