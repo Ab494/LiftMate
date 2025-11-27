@@ -9,7 +9,39 @@ const rideRoutes = require('./routes/rides'); // <-- Added rides routes
 const paymentRoutes = require('./routes/payment');
 
 const app = express();
-app.use(cors());
+
+// Enhanced CORS configuration for production
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://localhost:3000',
+      'https://localhost:5173',
+      // Production Vercel domain
+      'https://lift-mate.vercel.app',
+      // Backend domain for health checks
+      'https://liftmate-46f4.onrender.com',
+      // Environment variable fallback
+      process.env.FRONTEND_URL || 'https://lift-mate.vercel.app'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
