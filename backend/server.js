@@ -24,7 +24,12 @@ mongoose.connect(process.env.MONGO_URI, {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes); // <-- Mount ride routes
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', paymentRoutes); // <-- Mount payment routes
+
+// Health check endpoint for Render
+app.get('/api/auth/test', (req, res) => {
+  res.json({ status: 'OK', message: 'LiftMate Backend is running', timestamp: new Date().toISOString() });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
