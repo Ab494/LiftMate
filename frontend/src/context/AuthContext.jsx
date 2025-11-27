@@ -11,6 +11,15 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (token) {
         const decoded = jwtDecode(token); // ✅ Works
+        
+        // Check if token is expired
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp && decoded.exp < currentTime) {
+          console.log("Token expired, removing from localStorage");
+          localStorage.removeItem("token");
+          return null;
+        }
+        
         return { ...decoded, token };
       }
       return null;
@@ -32,12 +41,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await api.post("/auth/login", { email, password });
-      const token = res.data.token;
+      const { token, user } = res.data;
 
       const decoded = jwtDecode(token); // ✅ Works
       setUser({ ...decoded, token });
 
-      return { success: true, role: decoded.role };
+      // Return complete user data including role
+      return { 
+        success: true, 
+        user: user,
+        role: decoded.role 
+      };
     } catch (err) {
       return {
         success: false,
@@ -49,12 +63,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role, gender, carRegNumber, carMake, carModel, carColor) => {
     try {
       const res = await api.post("/auth/register", { name, email, password, role, gender, carRegNumber, carMake, carModel, carColor });
-      const token = res.data.token;
+      const { token, user } = res.data;
 
       const decoded = jwtDecode(token); // ✅ Works
       setUser({ ...decoded, token });
 
-      return { success: true };
+      // Return complete user data including role
+      return { 
+        success: true,
+        user: user,
+        role: decoded.role 
+      };
     } catch (err) {
       return {
         success: false,
