@@ -101,4 +101,30 @@ async function transactionStatusQuery(transactionId) {
   return response.data;
 }
 
-module.exports = { stkPush, stkPushQuery, transactionStatusQuery };
+// Query account balance
+async function accountBalance() {
+  const token = await getAccessToken();
+  const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14); // YYYYMMDDHHMMSS
+  const password = Buffer.from(`${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`).toString('base64');
+
+  const url =
+    MPESA_ENV === 'sandbox'
+      ? 'https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query'
+      : 'https://api.safaricom.co.ke/mpesa/accountbalance/v1/query';
+
+  const payload = {
+    Initiator: process.env.MPESA_INITIATOR_NAME || 'testapi',
+    SecurityCredential: process.env.MPESA_SECURITY_CREDENTIAL || 'test',
+    CommandID: 'AccountBalance',
+    PartyA: MPESA_SHORTCODE,
+    IdentifierType: '4',
+    Remarks: 'Account balance check',
+    QueueTimeOutURL: MPESA_CALLBACK_URL,
+    ResultURL: MPESA_CALLBACK_URL
+  };
+
+  const response = await axios.post(url, payload, { headers: { Authorization: `Bearer ${token}` } });
+  return response.data;
+}
+
+module.exports = { stkPush, stkPushQuery, transactionStatusQuery, accountBalance };

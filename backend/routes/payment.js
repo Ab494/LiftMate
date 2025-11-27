@@ -1,5 +1,5 @@
 const express = require('express');
-const { stkPush, stkPushQuery, transactionStatusQuery } = require('../mpesa');
+const { stkPush, stkPushQuery, transactionStatusQuery, accountBalance } = require('../mpesa');
 const Ride = require('../models/Ride');
 
 const router = express.Router();
@@ -40,6 +40,16 @@ router.post('/mpesa-transaction-status', async (req, res) => {
         res.json(response);
     } catch (err) {
         res.status(500).json({ message: 'M-Pesa transaction status error', err });
+    }
+});
+
+// Query M-Pesa account balance
+router.get('/mpesa-account-balance', async (req, res) => {
+    try {
+        const response = await accountBalance();
+        res.json(response);
+    } catch (err) {
+        res.status(500).json({ message: 'M-Pesa account balance error', err });
     }
 });
 
