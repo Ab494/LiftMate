@@ -51,4 +51,26 @@ async function stkPush(phone, amount, rideId) {
   return response.data;
 }
 
-module.exports = { stkPush };
+// Query STK Push payment status
+async function stkPushQuery(checkoutRequestId) {
+  const token = await getAccessToken();
+  const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14); // YYYYMMDDHHMMSS
+  const password = Buffer.from(`${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`).toString('base64');
+
+  const url =
+    MPESA_ENV === 'sandbox'
+      ? 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+      : 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+
+  const payload = {
+    BusinessShortCode: MPESA_SHORTCODE,
+    Password: password,
+    Timestamp: timestamp,
+    CheckoutRequestID: checkoutRequestId
+  };
+
+  const response = await axios.post(url, payload, { headers: { Authorization: `Bearer ${token}` } });
+  return response.data;
+}
+
+module.exports = { stkPush, stkPushQuery };

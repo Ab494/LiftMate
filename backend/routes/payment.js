@@ -1,5 +1,5 @@
 const express = require('express');
-const { stkPush } = require('../mpesa');
+const { stkPush, stkPushQuery } = require('../mpesa');
 const Ride = require('../models/Ride');
 
 const router = express.Router();
@@ -12,6 +12,20 @@ router.post('/mpesa', async (req, res) => {
         res.json(response);
     } catch (err) {
         res.status(500).json({ message: 'M-Pesa payment error', err });
+    }
+});
+
+// Query M-Pesa STK Push status
+router.post('/mpesa-query', async (req, res) => {
+    const { checkoutRequestId } = req.body;
+    if (!checkoutRequestId) {
+        return res.status(400).json({ message: 'CheckoutRequestId is required' });
+    }
+    try {
+        const response = await stkPushQuery(checkoutRequestId);
+        res.json(response);
+    } catch (err) {
+        res.status(500).json({ message: 'M-Pesa query error', err });
     }
 });
 
