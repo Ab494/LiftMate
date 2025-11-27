@@ -1,9 +1,13 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import { useEffect, useState } from 'react';
+import { Button, Typography, Box, Chip } from '@mui/material';
 import ExploreIcon from '@mui/icons-material/Explore';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import PersonIcon from '@mui/icons-material/Person';
 
 // Fix default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -57,54 +61,64 @@ const MapView = ({ pickup, dropoff, routes, selectedRouteIndex, center, markers,
     return null;
   };
 
-  // Custom icons
-  const riderIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-
-  const driverIcon = new L.Icon({
-    iconUrl: '/images/image-removebg-preview (3).png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  // Custom icons with modern design
+  const riderIcon = new L.divIcon({
+    html: '<div style="background-color: #2196F3; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><span style="color: white; font-size: 16px;">👤</span></div>',
+    className: 'custom-marker',
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30],
-    shadowSize: [41, 41]
+    iconAnchor: [15, 15]
   });
 
-  const rideIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+  const driverIcon = new L.divIcon({
+    html: '<div style="background-color: #4CAF50; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><span style="color: white; font-size: 18px;">🚗</span></div>',
+    className: 'custom-marker',
+    iconSize: [35, 35],
+    iconAnchor: [17, 17]
   });
 
-  const acceptedIcon = new L.Icon({
-    iconUrl: '/images/pngtree-car-view-from-above-icon-object-web-design-above-vector-png-image_35563696.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30],
-    shadowSize: [41, 41]
+  const rideIcon = new L.divIcon({
+    html: '<div style="background-color: #FF5722; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><span style="color: white; font-size: 16px;">📍</span></div>',
+    className: 'custom-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+
+  const acceptedIcon = new L.divIcon({
+    html: '<div style="background-color: #FF9800; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><span style="color: white; font-size: 16px;">✅</span></div>',
+    className: 'custom-marker',
+    iconSize: [34, 34],
+    iconAnchor: [17, 17]
   });
 
   return (
-    <div style={{ marginTop: '20px', position: 'relative' }}>
+    <Box sx={{ mt: 3, position: 'relative', borderRadius: 2, overflow: 'hidden', boxShadow: 3 }}>
       <MapContainer
         center={center || pickup || defaultPosition}
         zoom={13}
-        style={{ height: '450px', width: '100%' }}
+        style={{ height: '500px', width: '100%' }}
+        zoomControl={true}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-        />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="OpenStreetMap">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Satellite">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.arcgis.com/">Esri</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Terrain">
+            <TileLayer
+              url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+            />
+          </LayersControl.BaseLayer>
+        </LayersControl>
+
         {markers ? (
           markers.map((marker, index) => {
             let icon;
@@ -121,23 +135,121 @@ const MapView = ({ pickup, dropoff, routes, selectedRouteIndex, center, markers,
                 icon={icon}
                 eventHandlers={marker.onClick ? { click: marker.onClick } : {}}
               >
-                <Popup>{marker.title}</Popup>
+                <Popup>
+                  <Box sx={{ minWidth: 200, p: 1 }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
+                      {marker.icon === 'ride' ? '🚕 New Ride Request' :
+                       marker.icon === 'accepted' ? '✅ Accepted Ride' :
+                       marker.icon === 'rider' ? '👤 Rider' : '🚗 Driver'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      {marker.title}
+                    </Typography>
+                    {marker.icon === 'ride' && marker.rideData && (
+                      <Box sx={{ mt: 2 }}>
+                        <Chip
+                          label={`KES ${marker.rideData.fare}`}
+                          color="primary"
+                          size="small"
+                          sx={{ mr: 1, mb: 1 }}
+                        />
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          📍 {marker.rideData.pickupLocation}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                          🎯 {marker.rideData.dropoffLocation}
+                        </Typography>
+                        {marker.onAccept && (
+                          <Button
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            onClick={() => marker.onAccept(marker.rideData)}
+                            sx={{ mr: 1 }}
+                          >
+                            Accept Ride
+                          </Button>
+                        )}
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {}}
+                        >
+                          View Details
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+                </Popup>
               </Marker>
             );
           })
         ) : (
           <>
-            {pickup && <Marker position={pickup}><Popup>Pickup</Popup></Marker>}
-            {dropoff && <Marker position={dropoff}><Popup>Dropoff</Popup></Marker>}
+            {pickup && (
+              <Marker position={pickup} icon={riderIcon}>
+                <Popup>
+                  <Box sx={{ p: 1 }}>
+                    <Typography variant="h6">📍 Pickup Location</Typography>
+                    <Typography variant="body2">Passenger waiting here</Typography>
+                  </Box>
+                </Popup>
+              </Marker>
+            )}
+            {dropoff && (
+              <Marker position={dropoff} icon={rideIcon}>
+                <Popup>
+                  <Box sx={{ p: 1 }}>
+                    <Typography variant="h6">🎯 Dropoff Location</Typography>
+                    <Typography variant="body2">Destination</Typography>
+                  </Box>
+                </Popup>
+              </Marker>
+            )}
             {pickup && dropoff && <Routing />}
           </>
         )}
       </MapContainer>
-      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, backgroundColor: 'white', borderRadius: '50%', padding: '5px' }}>
-        <ExploreIcon style={{ fontSize: '30px', color: '#333' }} />
-      </div>
-      {eta && <p>Estimated travel time: {eta} min</p>}
-    </div>
+
+      {/* Modern control panel */}
+      <Box sx={{
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        zIndex: 1000,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1
+      }}>
+        <Box sx={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 2,
+          p: 1,
+          boxShadow: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <LocationOnIcon sx={{ color: '#1976d2' }} />
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+            Live Map
+          </Typography>
+        </Box>
+
+        {eta && (
+          <Box sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: 2,
+            p: 1,
+            boxShadow: 2
+          }}>
+            <Typography variant="body2" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+              ⏱️ ETA: {eta} min
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };
 

@@ -89,12 +89,15 @@ const DriverDashboard = () => {
       position: [-1.2921 + index * 0.01, 36.8219 + index * 0.01], // Mock coordinates
       title: `Ride from ${ride.pickupLocation} - ${ride.passenger?.name}`,
       icon: 'ride',
+      rideData: ride,
+      onAccept: handleAcceptRide,
       onClick: () => setSelectedRide(ride)
     })),
     ...acceptedRides.map((ride, index) => ({
       position: [-1.2921 - index * 0.01, 36.8219 - index * 0.01], // Mock coordinates
       title: `Accepted: ${ride.pickupLocation} - ${ride.passenger?.name}`,
-      icon: 'accepted'
+      icon: 'accepted',
+      rideData: ride
     }))
   ];
 
