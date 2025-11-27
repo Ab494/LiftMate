@@ -6,11 +6,23 @@ The registration is failing with a 500 error. This is likely due to **missing or
 
 ## 🛠️ **Quick Fix Steps**
 
-### Step 1: Check Render Environment Variables
+### Step 1: Commit and Push the Fixes
 
-1. **Go to Render Dashboard** → Your Service (`liftmate-46f4`)
-2. **Click "Environment" tab**
-3. **Verify these variables are set**:
+I've updated the code to fix deployment issues. First, commit and push the changes:
+
+```bash
+git add .
+git commit -m "Fix registration error and improve logging"
+git push origin main
+```
+
+Wait 2-3 minutes for Render to auto-deploy.
+
+### Step 2: Check Render Environment Variables
+
+After deployment, go to **Render Dashboard** → Your Service (`liftmate-46f4`) → **"Environment" tab**
+
+**Verify these variables are set**:
 
 | Variable | Value | Status |
 |----------|-------|--------|
@@ -20,7 +32,7 @@ The registration is failing with a 500 error. This is likely due to **missing or
 | `JWT_SECRET` | `VrQf12xp5JoSAFoBY239aHj8u1L22hnfFhc9rtEE5FI=` | ⚠️ **CHECK THIS** |
 | `FRONTEND_URL` | `https://lift-mate.vercel.app` | ⚠️ **CHECK THIS** |
 
-### Step 2: Fix Missing Variables
+### Step 3: Fix Missing Variables
 
 If any of the above variables are missing or empty:
 
@@ -28,7 +40,7 @@ If any of the above variables are missing or empty:
 2. **Add the missing variables** using the values from [`backend/.env.example`](backend/.env.example)
 3. **Save and restart your service**
 
-### Step 3: Test the Fix
+### Step 4: Test the Fix
 
 After updating environment variables:
 
